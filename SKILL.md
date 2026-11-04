@@ -102,9 +102,10 @@ path; adjust it there.
   `(buffer-pretend-modified u) (buffer-save u)` to store `<\references>`.
   A fresh file needs **two typesetting runs, in separate processes, each with
   a real PDF export** before all references resolve (`scripts/latex2tm/typeset.sh`).
-  Headless export never overwrites an existing file (it would ask for
-  confirmation): delete the target first, or pass `(list :overwrite)` as the
-  options (mgubi/texmacs#807). `tm-typeset` in `dump.scm` removes it.
+  **Always export with `(list :overwrite)` as the options**: headless,
+  `export-buffer-main` otherwise asks for confirmation to replace an existing
+  file, nobody answers, and the export is silently skipped (mgubi/texmacs#807).
+  `tm-typeset` and `tm-html` in `dump.scm` do this.
 - Presentations (`screens`) export only the current screen. For a visual check
   build a preview copy with the screens flattened into pages separated by
   `new-page*` (`scripts/latex2tm/preview_slides.py`); deliver the screens version.
@@ -234,8 +235,8 @@ document's package. Such a plugin holds:
   even when the page is scrolled (hash, `scrollIntoView`): `position:fixed`
   elements then disappear from the capture. Test scroll-dependent behaviour
   by recording state in `DOMContentLoaded` and scrolling back.
-- **Exports do not overwrite an existing target file** (PDF and HTML): delete
-  it first. Headless Firefox caches CSS in its profile: use a fresh profile
+- **Exports do not overwrite an existing target file** (PDF and HTML) unless
+  the options contain `:overwrite` (see above). Headless Firefox caches CSS in its profile: use a fresh profile
   directory for each visual check.
 - `screens` export one `<div class="toggle">` per screen (primitive
   `hidden`/`shown`, no navigation; a hide-preamble yields an empty first
@@ -724,12 +725,12 @@ override them.
   `<myframed-2|<old-render-theorem|which|body>>` (save the old one with
   `<assign|old-render-theorem|<value|render-theorem>>`); the HTML export
   follows through the tmhtml rendering of myframed-2.
-- tm-typeset does not overwrite an existing PDF reliably: remove it first.
-  Headless `export-buffer-main` silently keeps an existing target, so the
-  second (post-aux) export of `tm-typeset` and every later pass were lost and
-  pass-to-pass comparisons compared one stale file (all citations stayed
-  `[?]`). `scripts/latex2tm/dump.scm` removes the target before each export
-  (mgubi/texmacs#807); check the PDF timestamp if a build looks unchanged.
+- Without `:overwrite`, headless `export-buffer-main` silently keeps an
+  existing target, so the second (post-aux) export of a typesetting run and
+  every later pass were lost and pass-to-pass comparisons compared one stale
+  file (all citations stayed `[?]`). Export with `(list :overwrite)`, as
+  `scripts/latex2tm/dump.scm` does; check the PDF timestamp if a build looks
+  unchanged.
 - TikZ plugin images: run `latex` then plain `dvips -q x.dvi -o x.eps` on the standalone class. `dvips -E` writes a wrong BoundingBox next to the standalone page size and the image comes out blank in TeXmacs (seen 2026-11-01).
 - Check figures by rendering the PDF page; a blank EPS gives no typesetting error, only white space above the caption.
 - Conditional expectations: `rebracket.py` can remove the conditioning bar

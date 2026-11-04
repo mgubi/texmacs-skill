@@ -15,13 +15,11 @@
     (style-clear-cache)
     (load-buffer u)
     (switch-to-buffer u)
-    ;; headless export silently refuses to overwrite: remove the target first
-    (when (url-exists? (string->url pdf)) (system-remove (string->url pdf)))
-    (export-buffer-main u (string->url pdf) "pdf" (list))
+    ;; :overwrite, otherwise headless export silently keeps an existing file
+    (export-buffer-main u (string->url pdf) "pdf" (list :overwrite))
     (generate-all-aux)
     (update-current-buffer)
-    (when (url-exists? (string->url pdf)) (system-remove (string->url pdf)))
-    (export-buffer-main u (string->url pdf) "pdf" (list))
+    (export-buffer-main u (string->url pdf) "pdf" (list :overwrite))
     (buffer-pretend-modified u)
     (buffer-save u)))
 (define (tm-html in out mathjax)
@@ -33,4 +31,4 @@
     (style-clear-cache)
     (load-buffer u)
     (switch-to-buffer u)
-    (export-buffer-main u (string->url out) "html" (list))))
+    (export-buffer-main u (string->url out) "html" (list :overwrite))))
