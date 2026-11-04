@@ -34,3 +34,7 @@ conventions are best kept in a separate local skill that refers to this one.
 
 The scripts assume macOS paths for TeXmacs (`run.sh`), Python 3 and, for some
 checks, `mutool` (MuPDF) and ImageMagick.
+
+## License
+
+MIT; see [LICENSE](LICENSE).
