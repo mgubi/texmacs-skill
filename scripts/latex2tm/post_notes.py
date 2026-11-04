@@ -241,6 +241,24 @@ def script_letters(x):
     return x
 body = walk(body, script_letters)
 
+# ------------------------------------------------ upright d and D: the symbols <mathd>, <mathD>
+UPRIGHT = {'d': '<mathd>', 'D': '<mathD>'}
+def differentials(x):
+    if isinstance(x, list):
+        x = [x[0]] + [differentials(y) for y in x[1:]]
+        if x[0] == 'concat':
+            out = []
+            for y in x[1:]:   # children are already converted
+                if y == '<mathd>' and out and is_node(out[-1], 'space') \
+                        and out[-1][1:] == ['0.17em']:
+                    out.pop()   # <mathd> carries its own thin space
+                out.append(y)
+            x = ['concat'] + out
+        elif x[0] == 'math-up' and len(x) == 2 and x[1] in UPRIGHT:
+            x = UPRIGHT[x[1]]
+    return x
+body = differentials(body)
+
 # ------------------------------------------------ style and page layout
 def restyle(x):
     if is_node(x, 'style'):

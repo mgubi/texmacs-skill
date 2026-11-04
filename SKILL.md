@@ -28,6 +28,44 @@ Source: <https://github.com/mgubi/texmacs-skill>. Last update: 2026-11-04.
   refuse or corrupt it). Read/write with Python `encoding='latin-1',
   newline=''`, or better go through the stree route below and let TeXmacs
   write the file.
+- **Writing a `.tm` file by hand: copy this skeleton exactly.** The
+  top-level items are separated by *blank lines*; without them TeXmacs keeps
+  only the `<TeXmacs|…>` header and silently drops everything else (the
+  stree dump is `(document (TeXmacs "2.1.5"))`, the PDF is empty, and there
+  is no error):
+
+  ```
+  <TeXmacs|2.1.5>
+
+  <style|<tuple|article|british>>
+
+  <\body>
+    First paragraph with <math|x<rsup|2>>.
+
+    Second paragraph.
+  </body>
+
+  <\initial>
+    <\collection>
+      <associate|font|TeX Gyre Pagella>
+    </collection>
+  </initial>
+  ```
+
+  Inside `<\body>` paragraphs (and the blocks of any `<\tag>…</tag>`) are
+  also separated by blank lines; a single newline continues the same
+  paragraph. Close every block tag on its own line, escape symbols as
+  `\<alpha\>` and literal `<`, `>`, `|` in text as `<less>`, `<gtr>`, `\|`,
+  and keep the file Cork/Latin-1 (write it with Python, not `printf` or the
+  Write tool, as soon as it holds a non-ASCII character).
+- **Prefer generating over hand-writing.** For anything beyond a few lines,
+  build the stree in Python (`scripts/latex2tm/stree.py`) and let TeXmacs
+  serialise it (`tm-undump` in `dump.scm`); or write the fragment, `tm-dump`
+  it and splice the tree. When writing by hand, **check the result before
+  using it**: `tm-dump` it and confirm that the body has the expected number
+  of paragraphs, or typeset it and confirm that the PDF text is non-empty
+  and complete (`mutool draw -F txt`). An empty or short PDF, or a dump
+  with one huge node, means a formatting error, not a TeXmacs bug.
 - Big files: talks embed images as raw data (10+ MB). Strip `<#…>` runs
   before reading: `re.sub(r'<#[0-9A-F]{200,}>', '<#HEX>', s)`.
 
@@ -310,7 +348,7 @@ parts are here (`rwlib.py`, the outline and report scripts). Method:
   The plugin runs `latex` + `dvips` on the input (wrapping it in
   `\documentclass[tikz]{standalone}` unless it already starts with
   `\documentclass`), so generate the stored output the same way.
-- Math symbols: `<leqslant>`, `<geqslant>` for inequalities (never `<leq>`, `<geq>`, `<le>`, `<ge>`); `<mathd>`, `<mathe>`, `<mathi>` for upright d, e, i;
+- Math symbols: `<leqslant>`, `<geqslant>` for inequalities (never `<leq>`, `<geq>`, `<le>`, `<ge>`); `<mathd>`, `<mathe>`, `<mathi>` for upright d, e, i, and `<mathD>` for an upright derivative operator D;
   `<math-up|Tr>` for operator names; `<big|int>`, `<big|iint>`, `<big|sum>`;
   `<around*|(|…|)>` for `\left(…\right)`; `<wide|x|^>` accents.
 
@@ -503,6 +541,23 @@ override them.
 
 - **Inequalities: `\<leqslant\>` and `\<geqslant\>`** (stree `<leqslant>`, `<geqslant>`), not `\<leq\>`, `\<geq\>`, `\<le\>` or `\<ge\>`. The LaTeX importer produces `<leq>`/`<geq>`; `post_notes.py` converts them, but hand-written markup and generators must emit the slanted forms directly. Check with a grep before delivering, skipping embedded image data.
 
+- **Differentials and derivative operators are upright symbols, not
+  letters.** The integration differential is `\<mathd\>x`
+  (`<big|int>f<around|(|x|)>*\<mathd\>x`, `\<mathd\>t`, `\<mathd\>s`,
+  `<frac|\<mathd\>|\<mathd\>t>`), never `d*x`: a plain `d` is an italic
+  variable. Likewise a derivative operator written D (Fréchet or
+  Malliavin derivative, `DF<around|(|\<varphi\>|)><around|[|h|]>`,
+  `D<rsup|2>V`) is `\<mathD\>`, never the letter `D`. TeXmacs adds the
+  thin space before `\<mathd\>` itself: do not insert `<space|…>`.
+  Stochastic differentials follow the same rule (`\<mathd\>B<rsub|t>`,
+  `\<mathd\>W`). Leave `d` and `D` alone where they are genuine
+  variables, dimensions or names (`d` = space dimension, a matrix `D`).
+  The LaTeX importer turns `\,\mathrm{d}x` into
+  `<space|0.17em><math-up|d>x` and `\mathrm{D}` into `<math-up|D>`;
+  `post_notes.py` rewrites these as `\<mathd\>`/`\<mathD\>` and drops
+  the space. A bare `dx` or `DF` stays `d*x`, `D*F`: check integrals,
+  derivatives and stochastic differentials by hand, and look at the
+  rendered page.
 - **Non-breaking spaces.** Put `<nbsp>` (never a plain space) between text and
   a citation or cross-reference, and in numbered names:
   `Bauerschmidt and Bodineau<nbsp><cite|BB19>`, `by<nbsp><eqref|eq:x>`,
