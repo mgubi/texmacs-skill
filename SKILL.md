@@ -9,7 +9,8 @@ A practical guide for agents working with GNU TeXmacs, collected while
 converting lecture notes and talks, writing style packages and auditing long
 mathematical manuscripts. Keep it alive: append what is newly learnt to
 "Pitfalls" and keep the scripts in `scripts/` working. Project-specific
-conventions belong in a separate local skill that points here.
+additions belong in a separate local skill that points here; the
+"Conventions (mandatory)" section applies everywhere.
 Source: <https://github.com/mgubi/texmacs-skill>. Last update: 2026-11-04.
 
 ## The file format
@@ -535,12 +536,17 @@ with a script.
 - "missing 'X' master" in the log is harmless (substitution lookup);
   confirm the embedded fonts with `mutool info -F file.pdf`.
 
-## Recommended conventions
+## Conventions (mandatory)
 
-Defaults that keep documents consistent and editable; a project skill may
-override them.
+These rules are **mandatory for every TeXmacs document** written, converted or
+edited with this skill. They are not defaults to be overridden: they keep the
+markup semantic (TeXmacs knows the extent of every bracket and the role of
+every symbol) and the typography consistent. Check them before delivering:
+`scan.py`, `around_pairs.py` and `nbsp.py -n` on the stree dump, a grep for
+`\<leq\>`/`\<geq\>` and for bare `d*`/`D*` in maths, and a look at the
+rendered pages.
 
-- **Inequalities: `\<leqslant\>` and `\<geqslant\>`** (stree `<leqslant>`, `<geqslant>`), not `\<leq\>`, `\<geq\>`, `\<le\>` or `\<ge\>`. The LaTeX importer produces `<leq>`/`<geq>`; `post_notes.py` converts them, but hand-written markup and generators must emit the slanted forms directly. Check with a grep before delivering, skipping embedded image data.
+- **Inequalities: always `\<leqslant\>` and `\<geqslant\>`** (stree `<leqslant>`, `<geqslant>`), never `\<leq\>`, `\<geq\>`, `\<le\>` or `\<ge\>`. The LaTeX importer produces `<leq>`/`<geq>`; `post_notes.py` converts them, but hand-written markup and generators must emit the slanted forms directly. Check with a grep before delivering, skipping embedded image data.
 
 - **Differentials and derivative operators are upright symbols, not
   letters.** The integration differential is `\<mathd\>x`

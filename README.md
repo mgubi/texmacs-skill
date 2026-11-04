@@ -30,7 +30,10 @@ git submodule add https://github.com/mgubi/texmacs-skill skills/texmacs
 
 Keep the relative layout of `scripts/` intact: the restructuring tools import
 `stree.py` from the sibling `latex2tm/` directory. Project-specific
-conventions are best kept in a separate local skill that refers to this one.
+additions are best kept in a separate local skill that refers to this one.
+The conventions in `SKILL.md` (slanted inequalities, upright differentials
+and derivative operators, non-breaking spaces before references, brackets as
+`around`) are mandatory for every document.
 
 The scripts assume macOS paths for TeXmacs (`run.sh`), Python 3 and, for some
 checks, `mutool` (MuPDF) and ImageMagick.
