@@ -13,6 +13,20 @@ additions belong in a separate local skill that points here; the
 "Conventions (mandatory)" section applies everywhere.
 Source: <https://github.com/mgubi/texmacs-skill>. Last update: 2026-11-04.
 
+## Keeping this skill up to date
+
+This skill is meant to be installed as a git clone (usually
+`~/.claude/skills/texmacs`). Before working on TeXmacs documents:
+
+- **Update it:** run `git -C <skill dir> pull --ff-only` (if SSH to GitHub
+  fails, pull from `https://github.com/mgubi/texmacs-skill.git main`). If the
+  clone has local changes or commits that are not pushed, tell the user
+  instead of pulling over them.
+- **Contribute back:** when something new about TeXmacs is learnt, add it
+  here (usually to "Pitfalls", or fix a script), commit it in the clone and
+  push it to GitHub (or open a pull request if you cannot push), so every
+  installation gets it. Project-specific material stays in the project.
+
 ## The file format
 
 - A `.tm` file is a serialised tree: `<tag|arg1|arg2>` inline,
