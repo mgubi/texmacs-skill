@@ -753,6 +753,7 @@ rendered pages.
   unchanged.
 - TikZ plugin images: run `latex` then plain `dvips -q x.dvi -o x.eps` on the standalone class. `dvips -E` writes a wrong BoundingBox next to the standalone page size and the image comes out blank in TeXmacs (seen 2026-11-01).
 - Check figures by rendering the PDF page; a blank EPS gives no typesetting error, only white space above the caption.
+- **`tm-typeset` saves the buffer, so typesetting a malformed file destroys it.** One extra `>` in a hand-edited `.tm` made TeXmacs drop the whole body, and the save in `tm-typeset` wrote back only the header, `<initial>` and `<references>` (49 KB → 3.6 KB, no error). Before typesetting an edited file, check that `<` and `>` balance in each top-level paragraph of the body; typeset a copy in a scratch folder and install it only if the PDF is complete. Never chain an edit and a typesetting run with `;`: a failed edit must stop the run. (A stray `>` that only closes the opening of `<\big-table|…>` early is silent too: the table renders, the caption is lost.)
 - Conditional expectations: `rebracket.py` can remove the conditioning bar
   when flattening `\left[\left. ... \right| ... \right]`. Prefer
   `\left[ ... \mid ... \right]` in the import source, and check the bar
