@@ -512,6 +512,10 @@ with a script.
   not render (red "(centerdot)"). Use a raised full stop
   `<move|.|0fn|0.32fn>`. £ is the Cork byte 0xBF; check any other
   character with `(utf8->cork "…")` headless.
+  Another way: import a one-line LaTeX file with the accent macro
+  (`tree-import` from "latex", then `tree-export` to "texmacs") and read the
+  byte TeXmacs writes. For example `\H{o}` (ő) is the Cork byte 0xAE, so
+  "Lőrinczi" is `L\xaerinczi` in a Latin-1 Python string.
 - Placeholders for empty arguments: `<macro|x|default|<if|<hc-blank|<arg|x>>|<arg|x><with|color|grey|<arg|default>>|<arg|x>>>`
   with `hc-blank` = `<or|<equal|<arg|x>|>|<equal|<arg|x>|<document|>>>`.
   Keep `<arg|x>` rendered in the empty branch too (else the cursor cannot
@@ -783,3 +787,8 @@ rendered pages.
   absolute-value bar. Treating its second backslash as the start of `\|`
   reverses later norm pairing across entire sections. Validate that protected
   norm pairs stay inside their math environments and keep braces balanced.
+- Symbols are written with backslashes inside the angle brackets:
+  `\<frak-d\>`, `\<frak-S\>`, `\<alpha\>`. Writing `<frak-d>` calls an
+  undefined macro and prints a red placeholder in the PDF; no error is raised.
+  After a scripted rename, grep the .tm for `<frak-`/`<cal-` without the
+  leading backslash and check the rendered page.
