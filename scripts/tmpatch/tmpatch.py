@@ -214,8 +214,9 @@ def structure_errors(s):
 
 def texmacs_binary():
     # The parse check dumps the tree with Guile's write.  The standard TeXmacs
-    # writes it in full; in TeXmacs Upsilon write abbreviates long data with
-    # "...", which would look like a truncated body.  Prefer the standard build.
+    # writes it in full; in TeXmacs Upsilon write abbreviates lists after 40
+    # elements with "..." (mgubi/texmacs#840), which would look like a
+    # truncated body.  Prefer the standard build.
     x = os.environ.get('TEXMACS_CHECK')
     if x:
         return x

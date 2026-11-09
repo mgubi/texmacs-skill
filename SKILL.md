@@ -314,8 +314,9 @@ document's package. Such a plugin holds:
   - **Backup.** It keeps `doc.tm.orig` unless `--no-backup`.
   - **`--show`.** `tmpatch.py --show doc.tm` prints the file decoded to
     UTF-8; `--encode TEXT` shows the serialization of a string.
-- Guile's `write` in TeXmacs Upsilon abbreviates long data with `"..."`, so a
-  `tm-dump` made with Upsilon looks like a truncated body. Use the standard
+- Guile's `write` in TeXmacs Upsilon abbreviates lists after 40 elements
+  with `...` (mgubi/texmacs#840), so a `tm-dump` made with Upsilon looks like
+  a truncated body. Use the standard
   TeXmacs for strees (`tmpatch.py --check` does; override with
   `TEXMACS_CHECK`).
 
