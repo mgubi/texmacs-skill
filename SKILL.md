@@ -640,6 +640,14 @@ rendered pages.
 
 ## Pitfalls seen so far
 
+- **Table formats are separate `tformat` arguments.** Write
+  `<tformat|<twith|…>|<cwith|…>|<table|…>>` with a `|` between every
+  `twith`/`cwith`; written back to back (`<cwith|…><cwith|…>`) they form one
+  concatenation argument and are silently ignored. For a table of page width
+  whose last column wraps: `<twith|table-width|1par>|<twith|table-hmode|exact>|
+  <cwith|1|-1|3|3|cell-hyphen|t>|<cwith|1|-1|3|3|cell-hpart|1>`, plus
+  `cell-width`/`cell-hmode|exact` for another wrapping column.
+
 - The 2.1.4 LaTeX importer numbered the `\notag`/`\nonumber` rows of
   `align` environments (82 extra numbers in 66 blocks of one imported
   manuscript), so equation numbers drift from the source and "the second
