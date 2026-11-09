@@ -11,7 +11,7 @@ mathematical manuscripts. Keep it alive: append what is newly learnt to
 "Pitfalls" and keep the scripts in `scripts/` working. Project-specific
 additions belong in a separate local skill that points here; the
 "Conventions (mandatory)" section applies everywhere.
-Source: <https://github.com/mgubi/texmacs-skill>. Last update: 2026-11-04.
+Source: <https://github.com/mgubi/texmacs-skill>. Last update: 2026-11-09.
 
 ## Keeping this skill up to date
 
@@ -264,6 +264,60 @@ document's package. Such a plugin holds:
   `drop_preamble.py` removes the hide-preamble.
 - Visual check: headless Firefox,
   `firefox --headless --profile DIR --window-size=1280,800 --screenshot out.png file:///…html#5`.
+
+## Reading and patching .tm files (scripts/tmread, scripts/tmpatch)
+
+- **Read a document as Markdown, not as PDF text.**
+  `scripts/tmread/tm2md.sh doc.tm [out.md|out.tex]` converts a document
+  headless, on a scratch copy with a private `TEXMACS_HOME_PATH`.
+  - The Markdown keeps theorem and equation numbers and cross-references
+    (resolved from the stored `<\references>`), writes every formula as
+    LaTeX, and keeps labelled links. It is the best reading copy for an
+    agent or a referee, and about 60% of the size of the source.
+  - The LaTeX export (`out.tex`) keeps `\label`/`\ref` unresolved.
+  - The text of the typeset PDF (`mutool draw -F txt`) mangles inline
+    mathematics; use it only to check what was typeset.
+  - The Markdown export needs TeXmacs Upsilon, and the script uses its Qt
+    port (`TeXmacs Upsilon Qt.app`, searched in `/Applications`,
+    `~/Applications` and `~/Downloads`; override with `TEXMACS_HEADLESS`).
+    The Cocoa port of Upsilon is not meant to run headless; the Vue app is
+    the web build. A few stray lines `bad assign` in the output are
+    harmless.
+- **Patch a document with `scripts/tmpatch/tmpatch.py`**, never with
+  `sed` or a UTF-8 editor. Write the patch in readable UTF-8 with TeXmacs
+  markup:
+
+  ```
+  @@ replace [count=N]
+  <<<
+  old text (é, –, ∞ allowed)
+  ===
+  new text (empty to delete)
+  >>>
+  ```
+
+  `tmpatch.py doc.tm fix.patch [--dry-run] [--check] [--no-backup]`.
+  - **Encoding.** It encodes the text to the file's serialization: Cork
+    bytes (é stays 0xE9, but § is 0x9F and Œ 0xD7), a backslash and a letter
+    for Cork bytes below 0x20 (en dash = `\U`, em dash = `\V`), and
+    `<#XXXX>` for any other character.
+  - **Matching.** It matches the old text whitespace-insensitively, since
+    TeXmacs rewraps lines, and requires exactly `count` occurrences
+    (default 1).
+  - **Safety.** All blocks are applied atomically. Nothing is written if a
+    body paragraph ends up with unbalanced `<`/`>`, or if block tags
+    `<\tag>…</tag>` no longer nest. This is the failure mode in which
+    TeXmacs silently drops the rest of the document.
+  - **`--check`.** It also imports the patched file with a headless
+    TeXmacs (`tm-dump`) and compares the number of top-level body
+    paragraphs with the text.
+  - **Backup.** It keeps `doc.tm.orig` unless `--no-backup`.
+  - **`--show`.** `tmpatch.py --show doc.tm` prints the file decoded to
+    UTF-8; `--encode TEXT` shows the serialization of a string.
+- Guile's `write` in TeXmacs Upsilon abbreviates long data with `"..."`, so a
+  `tm-dump` made with Upsilon looks like a truncated body. Use the standard
+  TeXmacs for strees (`tmpatch.py --check` does; override with
+  `TEXMACS_CHECK`).
 
 ## Restructuring a series of documents (scripts/restructure)
 
