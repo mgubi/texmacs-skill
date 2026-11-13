@@ -37,8 +37,10 @@ This skill is meant to be installed as a git clone (usually
 - **Encoding: strings are Cork (T1) encoded, not UTF‑8.** Accented Latin
   letters mostly coincide with Latin‑1 bytes (é = 0xE9, à = 0xE0, ö = 0xF6),
   but e.g. en dash = 0x15, em dash = 0x16, § = 0x9F; any other Unicode
-  character is written `<#XXXX>` (hex code point). Do not write `<#XX>` yourself as a
-  standalone token: it is read as raw data (see "Writing style packages").
+  character is written as the symbol `\<#17A\>` (hex code point, uppercase,
+  no padding, with the backslashes: this is what TeXmacs itself writes). A
+  bare `<#17A>` or `<#017A>`, even inside a string, is read as raw data and
+  silently swallows the rest of the paragraph (see "Writing style packages").
   Consequences: never edit a .tm with UTF‑8 tools (the Edit/Write tools
   refuse or corrupt it). Read/write with Python `encoding='latin-1',
   newline=''`, or better go through the stree route below and let TeXmacs
@@ -316,7 +318,7 @@ document's package. Such a plugin holds:
   - **Encoding.** It encodes the text to the file's serialization: Cork
     bytes (é stays 0xE9, but § is 0x9F and Œ 0xD7), a backslash and a letter
     for Cork bytes below 0x20 (en dash = `\U`, em dash = `\V`), and
-    `<#XXXX>` for any other character.
+    the symbol `\<#XXXX\>` for any other character.
   - **Matching.** It matches the old text whitespace-insensitively, since
     TeXmacs rewraps lines, and requires exactly `count` occurrences
     (default 1).
@@ -578,8 +580,8 @@ with a script.
   override in `<initial>`.
 - No letter-spacing property: track capitals by inserting `<hspace|0.14fn>`
   between letters (generate it).
-- `<#B7>` written as a separate token is **raw data**, not U+00B7 (it eats
-  the following text). `·` serialises as `<centerdot>`, which text fonts do
+- `<#B7>` (without the backslashes of `\<#B7\>`) is **raw data**, not
+  U+00B7, even inside a string (it eats the following text). `·` serialises as `<centerdot>`, which text fonts do
   not render (red "(centerdot)"). Use a raised full stop
   `<move|.|0fn|0.32fn>`. £ is the Cork byte 0xBF; check any other
   character with `(utf8->cork "…")` headless.

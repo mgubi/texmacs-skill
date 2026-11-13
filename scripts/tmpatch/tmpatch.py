@@ -5,7 +5,7 @@ TeXmacs files are serialized trees in the Cork (T1) encoding, not UTF-8:
 accented Latin letters are single bytes (mostly as in Latin-1, but e.g.
 § = 0x9F, Œ = 0xD7, ß = 0xFF), Cork bytes below 0x20 are written as a
 backslash and a letter (en dash 0x15 is the two characters "\\U"), and
-any other Unicode character is written <#XXXX>.  UTF-8 tools corrupt such
+any other Unicode character is written \\<#XXXX\\>.  UTF-8 tools corrupt such
 files, and an edit that leaves one '<' or '>' unbalanced can make TeXmacs
 drop the rest of the document without an error.
 
@@ -13,7 +13,7 @@ This tool lets an agent write patches in readable UTF-8 with TeXmacs markup,
 and applies them safely:
 
   * the patch text is encoded to the .tm serialization (Cork bytes, "\\X"
-    escapes for Cork control bytes, <#XXXX> for everything else);
+    escapes for Cork control bytes, \\<#XXXX\\> for everything else);
   * the old text is matched whitespace-insensitively (TeXmacs rewraps lines),
     and must occur exactly COUNT times (default 1);
   * all blocks are applied atomically, in order;
@@ -76,18 +76,19 @@ def encode(text):
         elif ch in ENC:
             out.append(ENC[ch])
         else:
-            out.append('<#%X>' % o)
+            # the symbol form; a bare <#17A> is raw data, not a character
+            out.append('\\<#%X\\>' % o)
     return ''.join(out)
 
 
 def decode(tm):
-    """.tm serialization -> readable UTF-8 (Cork bytes, \\X escapes and <#XXXX> resolved)."""
+    """.tm serialization -> readable UTF-8 (Cork bytes, \\X escapes and \\<#XXXX\\> resolved)."""
     def esc(m):
         c = m.group(1)
         return DEC_LOW.get(c, m.group(0))
     s = re.sub(r'\\\\|\\([@-Z\[\]^_])', lambda m: m.group(0) if m.group(0) == '\\\\' else esc(m), tm)
     s = ''.join(DEC_HIGH.get(c, c) for c in s)
-    return re.sub(r'<#([0-9A-Fa-f]{2,6})>', lambda m: chr(int(m.group(1), 16)), s)
+    return re.sub(r'\\<#([0-9A-Fa-f]{1,6})\\>', lambda m: chr(int(m.group(1), 16)), s)
 
 
 def read_tm(path):
