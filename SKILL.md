@@ -100,6 +100,14 @@ path; adjust it there.
   have TeXmacs open).
 - Headless runs write TeXmacs' own state under `~/.TeXmacs/system`; that is
   normal.
+- **Headless runs do not initialise plugins.** A plugin's `init-*.scm` (and
+  the modules it loads, e.g. MathJax fixes of an HTML-export plugin) is not
+  run, so exports silently miss them. Load the modules explicitly, from a
+  file: `use-modules` is only accepted at the top level of a file, so
+  `-x "(begin (use-modules …) …)"` fails ("use-modules can only be used at
+  the top level", and the process hangs if this happens outside the
+  `catch`). Write `(use-modules (my-plugin fixes))` into an init file and
+  start with `-x "(begin (load \"/abs/init.scm\") (catch #t …))"`.
 
 ### Scheme API that works headless (`scripts/latex2tm/dump.scm`)
 
@@ -141,7 +149,15 @@ as `~/.TeXmacs/plugins/max-html`), and keep document-specific settings in the
 document's package. Such a plugin holds:
 - `progs/max-html/fixes.scm`, loaded at startup, fixes the MathJax export.
   Labels inside formulas get anchors (#617), `\ring` is written
-  `\mathring` (#607) and `equations-base` is written `aligned` (#611). It
+  `\mathring` (#607) and `equations-base` is written `aligned` (#611);
+  `\llbracket`/`\rrbracket`/`\interleave` become the Unicode characters
+  U+27E6/U+27E7/U+2980, `\left\interleave … \right\interleave` three nested
+  stretchable `\vert`s, and a group that cuts a `\right` from its `\left`
+  (TeXmacs writes `{\right|_{a}}` when a bracket has two scripts) is
+  dissolved. In the LaTeX trees a symbol is `(!symbol (llbracket))` and a
+  delimiter a one-element list whose symbol is `left`/`right` followed by
+  a non-letter (`(left.)`, `(right|)`, `(left\interleave)`; `\leftarrow` is
+  not one). It
   replaces the binding of `tmhtml-mathjax-formula*` inside
   `(convert html tmhtml)` (`module-variable` + `variable-set!`; internal
   helpers like `cork->html` via `module-ref`) and extends `latex-mathjax`
@@ -694,6 +710,12 @@ rendered pages.
   5. Re-run `scan.py`: what is left should be conditioning bars only.
 
 ## Pitfalls seen so far
+
+- **The LaTeX writer wraps long lines.** `serialize-latex` (and LaTeX
+  exports) break long output over several lines, so a probe that prints
+  the LaTeX of a formula and is filtered line by line (`grep TEX`) seems to
+  drop the end of the formula. Look at the whole output, or join lines,
+  before concluding that a rewrite lost something.
 
 - **Table formats are separate `tformat` arguments.** Write
   `<tformat|<twith|…>|<cwith|…>|<table|…>>` with a `|` between every
