@@ -186,6 +186,36 @@ document's package. Such a plugin holds:
   extra stylesheets, default css kept), `html-extra-javascript-src` (tuple,
   deferred), `html-extra-javascript`, `html-head-javascript(-src)`,
   `html-head-favicon`, `html-title`, `html-doc-title`, `html-site-version`.
+- **The page `<title>` is mis-encoded when the title has markup** (2.1.5).
+  The C++ side (`exec_html`, edit_typeset.cpp) expands the document before
+  the export, so `tmhtml-find-title` finds no `doc-title` in the body; the
+  title comes from the `html-doc-title` it puts in a `with` in front, the
+  unexpanded doc-title. `tmhtml-file` reads it with `tmhtml-force-string`,
+  which keeps a plain (Cork) string but turns markup into UTF-8
+  (`texmacs->code`), and then writes it as Cork: math or a dash next to
+  markup comes out as UTF-8 read as Cork ("Îę^4_2" for Φ^4_2, "âĂŞ" for
+  –), and a `next-line` between words vanishes ("formulafor"). A plain
+  string title is right. Fix (the `max-html` plugin does it): wrap
+  `texmacs->html` with `tm-define … (former …)` and replace the values of
+  `html-doc-title`/`html-title` in the `(!file (with …) …)` by
+  `(utf8->cork (texmacs->code T "utf-8"))` of the title with line breaks
+  turned into spaces. Check titles with an HTML parser: the serializer
+  wraps long `<title>` lines.
+- Overriding converter internals: `variable-set!` on a module variable
+  works for functions called by name (`tmhtml-mathjax-formula*`), but
+  **not for handlers listed in a dispatch table** (`logic-table
+  tmhtml-primitives%`, e.g. `tmhtml-file` for `!file`): the table holds
+  the procedure itself. Wrap a `tm-define`d entry point (`texmacs->html`,
+  `latex-mathjax`) with `former` instead.
+- MSC codes (`abstract-msc` → `msc-ref`, title-base.ts) link to
+  `ams.org/mathscinet/search/mscbrowse.html?sk=…`, which answers 403.
+  Redefine `msc-ref` in a package to link to
+  `https://zbmath.org/classification/?q=cc:CODE` (the `max-html` package
+  does).
+- Headless PDF exports with 2.1.5 carried internal link annotations but
+  no external `/URI` links (a one-line test document with an `hlink` to
+  https://example.org got none; PDFs from the GUI of 2.1.1–2.1.4 have
+  them). Check with `mutool clean -d x.pdf y.pdf; grep -a -c URI y.pdf`.
 - **HTML renderings of macros: define `tmhtml-NAME` next to `NAME`.** The
   exporter uses it instead of `NAME`. Markup helpers for it:
   `html-div-class|class|body` (block), `html-class|class|body` (inline span),
