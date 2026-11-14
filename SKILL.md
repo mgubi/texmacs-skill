@@ -564,6 +564,14 @@ with a script.
   table in `<with|color|RULE|…>` and re-colour each cell's content; for a
   coloured rule inside a nested table, draw a bar instead: a 1×1 table with
   `cell-background`, `cell-width/height` + `cell-hmode/vmode|exact`.
+  A box with a coloured left rule (a callout), as one cell:
+  `<with|color|RULE|<tformat|<twith|table-width|1par>|<twith|table-hmode|exact>|<twith|table-block|yes>|<cwith|1|1|1|1|cell-hyphen|t>|<cwith|1|1|1|1|cell-background|PAPER>|<cwith|1|1|1|1|cell-lborder|3pt>|<cwith|1|1|1|1|cell-lsep|1em>|…|<table|<row|<\cell><with|color|INK|<arg|body>></cell>>>>>`
+  (all values may be macro arguments). Without the outer `with`, the
+  border is drawn in the text colour.
+- **`padded-framed` is not defined in 2.1.5** (nor anything like it for a
+  padded box): a style using it renders, in PDFs, the bare `⟨padded-framed|`
+  and its arguments in the error colour. Build boxes from tables as above
+  (`framed` exists, in std-utils, but has no padding or colour control).
 - **Paragraph-level properties only act on whole paragraphs**: inline
   `<with|par-mode|center|x>` or `<with|par-left|…|x>` inside a line is
   ignored; use the block form `<\with|par-mode|center>…</with>`.
