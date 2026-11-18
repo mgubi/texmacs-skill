@@ -751,6 +751,13 @@ rendered pages.
 
 ## Pitfalls seen so far
 
+- **A generated `screens` deck needs exactly one `shown` screen.** If every
+  screen is `hidden`, TeXmacs opens the file on a blank page. A preview that
+  flattens the screens into pages (`preview_slides.py`) hides the problem.
+  Generators must write the first screen as `<\shown>…</shown>`; check with
+  `tm-dump` (one `(shown`) and with a PDF export of the screens file itself,
+  whose single page must be the title.
+
 - **The LaTeX writer wraps long lines.** `serialize-latex` (and LaTeX
   exports) break long output over several lines, so a probe that prints
   the LaTeX of a formula and is filtered line by line (`grep TEX`) seems to
