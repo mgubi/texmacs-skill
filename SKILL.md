@@ -751,6 +751,16 @@ rendered pages.
 
 ## Pitfalls seen so far
 
+- **TikZ (and other `script-output`) in a presentation PDF.** `script-input`/
+  `script-output` form a toggle (`define-toggle` in `dynamic/scripts-drd.scm`),
+  and the PDF export of a `screens` deck expands every toggle into all its
+  states. Each picture then appears once as LaTeX source (overflowing onto
+  extra pages) and once with the `Busy...` placeholder instead of the image.
+  The stored output (an EPS from dvips) is fine. For a handout PDF, flatten
+  the screens (`preview_slides.py`) and typeset that: the plain document shows
+  only the output state. Alternatively replace each `script-output` by its
+  fourth argument in a copy.
+
 - **A generated `screens` deck needs exactly one `shown` screen.** If every
   screen is `hidden`, TeXmacs opens the file on a blank page. A preview that
   flattens the screens into pages (`preview_slides.py`) hides the problem.
